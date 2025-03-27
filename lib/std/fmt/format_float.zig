@@ -302,7 +302,7 @@ pub fn formatDecimal(comptime T: type, buf: []u8, f_: FloatDecimal(T), precision
         index += 2;
         const dp_index = index;
 
-        const dp_poffset: u32 = @intCast(-dp_offset);
+        const dp_poffset: usize = @intCast(-dp_offset);
         @memset(buf[index..][0..dp_poffset], '0');
         index += dp_poffset;
         writeDecimal(buf[index..], &output, olength);
@@ -421,7 +421,7 @@ pub fn binaryToDecimal(comptime T: type, bits: T, mantissa_bits: std.math.Log2In
         const k: i32 = @intCast(tables.POW5_INV_BITCOUNT + pow5Bits(q) - 1);
         const i: u32 = @intCast(-e2 + cast_i32(q) + k);
 
-        const pow5 = tables.computeInvPow5(q);
+        const pow5 = tables.computeInvPow5(@intCast(q));
         vr = tables.mulShift(4 * m2, &pow5, i);
         vp = tables.mulShift(4 * m2 + 2, &pow5, i);
         vm = tables.mulShift(4 * m2 - 1 - mm_shift, &pow5, i);
@@ -495,7 +495,7 @@ pub fn binaryToDecimal(comptime T: type, bits: T, mantissa_bits: std.math.Log2In
     };
 }
 
-fn decimalLength(v: anytype) u32 {
+fn decimalLength(v: anytype) usize {
     switch (@TypeOf(v)) {
         u32, u64 => {
             std.debug.assert(v < 100000000000000000);
@@ -520,7 +520,7 @@ fn decimalLength(v: anytype) u32 {
         u128 => {
             const LARGEST_POW10 = (@as(u128, 5421010862427522170) << 64) | 687399551400673280;
             var p10 = LARGEST_POW10;
-            var i: u32 = 39;
+            var i: usize = 39;
             while (i > 0) : (i -= 1) {
                 if (v >= p10) return i;
                 p10 /= 10;
@@ -639,7 +639,7 @@ pub const Backend128_Tables = struct {
     const bound2 = 127;
     const adjust_q = true;
 
-    fn computePow5(i: u32) [4]u64 {
+    fn computePow5(i: usize) [4]u64 {
         const base = i / FLOAT128_POW5_TABLE_SIZE;
         const base2 = base * FLOAT128_POW5_TABLE_SIZE;
         const mul = &FLOAT128_POW5_SPLIT[base];
@@ -656,7 +656,7 @@ pub const Backend128_Tables = struct {
         }
     }
 
-    fn computeInvPow5(i: u32) [4]u64 {
+    fn computeInvPow5(i: usize) [4]u64 {
         const base = (i + FLOAT128_POW5_TABLE_SIZE - 1) / FLOAT128_POW5_TABLE_SIZE;
         const base2 = base * FLOAT128_POW5_TABLE_SIZE;
         const mul = &FLOAT128_POW5_INV_SPLIT[base]; // 1 / 5^base2
@@ -697,11 +697,11 @@ pub const Backend64_TablesFull = struct {
     const bound2 = 63;
     const adjust_q = false;
 
-    fn computePow5(i: u32) [2]u64 {
+    fn computePow5(i: usize) [2]u64 {
         return FLOAT64_POW5_SPLIT[i];
     }
 
-    fn computeInvPow5(i: u32) [2]u64 {
+    fn computeInvPow5(i: usize) [2]u64 {
         return FLOAT64_POW5_INV_SPLIT[i];
     }
 };
@@ -716,7 +716,7 @@ pub const Backend64_TablesSmall = struct {
     const bound2 = 63;
     const adjust_q = false;
 
-    fn computePow5(i: u32) [2]u64 {
+    fn computePow5(i: usize) [2]u64 {
         const base = i / FLOAT64_POW5_TABLE_SIZE;
         const base2 = base * FLOAT64_POW5_TABLE_SIZE;
         const mul = &FLOAT64_POW5_SPLIT2[base];
@@ -734,7 +734,7 @@ pub const Backend64_TablesSmall = struct {
         }
     }
 
-    fn computeInvPow5(i: u32) [2]u64 {
+    fn computeInvPow5(i: usize) [2]u64 {
         const base = (i + FLOAT64_POW5_TABLE_SIZE - 1) / FLOAT64_POW5_TABLE_SIZE;
         const base2 = base * FLOAT64_POW5_TABLE_SIZE;
         const mul = &FLOAT64_POW5_INV_SPLIT2[base]; // 1 / 5^base2

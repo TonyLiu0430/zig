@@ -53,7 +53,7 @@ const Value = extern struct {
         assert(!value.td.isSigned());
         const size = value.td.getIntegerSize();
         const max_inline_size = @bitSizeOf(ValueHandle);
-        if (size <= max_inline_size) {
+        if (size <= max_inline_size and @bitSizeOf(usize) >= 32) {
             return @intFromPtr(value.handle);
         }
 
