@@ -544,7 +544,7 @@ fn log10Pow5(e: u32) u32 {
 }
 
 // if (e == 0) 1 else ceil(log_2(5^e))
-fn pow5Bits(e: u32) u32 {
+fn pow5Bits(e: usize) u32 {
     std.debug.assert(e <= 1 << 15);
     return @intCast(((@as(u64, @intCast(e)) * 163391164108059) >> 46) + 1);
 }
